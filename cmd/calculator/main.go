@@ -18,4 +18,6 @@ func main() {
 	printCalculation("1 + 2 * (4+(3-1)*(3*(-3+9))) -8")
 	printCalculation("1 + 7 * 4")
 	printCalculation("4/(1-1)")
+	printCalculation("4^(1-1)+sqrt(4^2)")
+	printCalculation("4 - 4 5")
 }

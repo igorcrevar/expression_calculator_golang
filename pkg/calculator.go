@@ -3,16 +3,30 @@ package pkg
 import (
 	"errors"
 	"fmt"
+	"math"
+	"strings"
 )
+
+type funcType int64
+
+const (
+	noneFunc funcType = 0
+	sqrtFunc funcType = 1
+)
+
+const defaultOperator byte = '+'
 
 type calculationStackItem struct {
 	stack    Stack
 	operator byte
+	function funcType
 }
 
 func Calculate(expression string) (float64, error) {
+	expression = strings.ToLower(expression)
+
 	stackOfStacks := Stack{} // make(Stack, 4)
-	var current calculationStackItem = calculationStackItem{stack: Stack{}, operator: '+'}
+	var current calculationStackItem = calculationStackItem{stack: Stack{}, operator: defaultOperator, function: noneFunc}
 	position := 0
 
 	for position < len(expression) {
@@ -23,14 +37,13 @@ func Calculate(expression string) (float64, error) {
 			if err != nil {
 				return 0, err
 			}
-			current.operator = '+'
 		} else {
 			ch := expression[position]
 			position += 1
 			switch ch {
 			case '(':
 				stackOfStacks.Push(current)
-				current = calculationStackItem{stack: Stack{}, operator: '+'}
+				current = calculationStackItem{stack: Stack{}, operator: defaultOperator, function: noneFunc}
 			case ')':
 				subResult := sumStack(&current.stack)
 				item, isOk := stackOfStacks.Pop()
@@ -42,7 +55,7 @@ func Calculate(expression string) (float64, error) {
 				if err != nil {
 					return 0, err
 				}
-			case '+', '/', '*':
+			case '+', '/', '*', '^':
 				current.operator = ch
 			case '-':
 				if current.operator == '-' {
@@ -52,7 +65,13 @@ func Calculate(expression string) (float64, error) {
 				}
 			case ' ': // Do nothing
 			default:
-				return 0, fmt.Errorf("invalid operator %c", ch)
+				// only low letters for now are
+				if ch == 's' && position+4 < len(expression) && expression[position:position+4] == "qrt(" {
+					current.function = sqrtFunc
+					position += 3 // not 4 because in next step ( case will be executed
+				} else {
+					return 0, fmt.Errorf("invalid operator %c", ch)
+				}
 			}
 		}
 	}
@@ -95,7 +114,18 @@ func readNumber(expression string, position int) (float64, int) {
 }
 
 func executeOperation(current *calculationStackItem, number float64) error {
-	switch current.operator {
+	// execute function on number if needed
+	switch current.function {
+	case sqrtFunc:
+		number = math.Sqrt(number)
+	}
+
+	lastOperator := funcType(current.operator)
+	// reset function and operator
+	current.function = noneFunc
+	current.operator = defaultOperator
+
+	switch lastOperator {
 	case '/':
 		prev, isOk := current.stack.Pop()
 		if !isOk {
@@ -113,6 +143,14 @@ func executeOperation(current *calculationStackItem, number float64) error {
 		}
 
 		current.stack.Push(prev.(float64) * number)
+		return nil
+	case '^':
+		prev, isOk := current.stack.Pop()
+		if !isOk {
+			return fmt.Errorf("try to execute pow but no previous number for %f", number)
+		}
+
+		current.stack.Push(math.Pow(prev.(float64), number))
 		return nil
 	case '-':
 		current.stack.Push(-number)

@@ -6,8 +6,7 @@ func TestSimple(t *testing.T) {
 	result, err := Calculate("1 + - 2.1")
 	if err != nil {
 		t.Errorf("got error %q", err)
-	}
-	if !almostEqual(result, -1.1) {
+	} else if !almostEqual(result, -1.1) {
 		t.Errorf("got result %f instead of %f", result, -1.1)
 	}
 }
@@ -16,9 +15,17 @@ func TestParenthesisComplex(t *testing.T) {
 	result, err := Calculate("1.89 + 2 * (4+(3-1)*(3*(-3+9))) -8.49")
 	if err != nil {
 		t.Errorf("got error %q", err)
-	}
-	if !almostEqual(result, 73.4) {
+	} else if !almostEqual(result, 73.4) {
 		t.Errorf("got result %f instead of %f", result, 73.4)
+	}
+}
+
+func TestSqrtAndPow(t *testing.T) {
+	result, err := Calculate("-sqrt(3+3*(2+2)) +2^(3+(1+1)+1)")
+	if err != nil {
+		t.Errorf("got error %q", err)
+	} else if !almostEqual(result, 60.1270166538) {
+		t.Errorf("got result %f instead of %f", result, 60.1270166538)
 	}
 }
 
@@ -26,8 +33,7 @@ func TestParenthesisSimple(t *testing.T) {
 	result, err := Calculate("((-3)*2)")
 	if err != nil {
 		t.Errorf("got error %q", err)
-	}
-	if !almostEqual(result, -6.0) {
+	} else if !almostEqual(result, -6.0) {
 		t.Errorf("got result %f instead of %f", result, -6.0)
 	}
 }
@@ -64,6 +70,14 @@ func TestInvalidDivide(t *testing.T) {
 func TestInvalidMultiply(t *testing.T) {
 	should := "try to multiply but no previous number for 3.000000"
 	_, err := Calculate("*3")
+	if err == nil || err.Error() != should {
+		t.Errorf("got error %q instead of %q", err, should)
+	}
+}
+
+func TestInvalidPow(t *testing.T) {
+	should := "try to execute pow but no previous number for 3.000000"
+	_, err := Calculate("^3")
 	if err == nil || err.Error() != should {
 		t.Errorf("got error %q instead of %q", err, should)
 	}
