@@ -9,6 +9,8 @@ import (
 
 type funcType int64
 
+type binaryFn func(a float64, b float64) float64
+
 const (
 	noneFunc funcType = 0
 	sqrtFunc funcType = 1
@@ -127,31 +129,14 @@ func executeOperation(current *calculationStackItem, number float64) error {
 
 	switch lastOperator {
 	case '/':
-		prev, isOk := current.stack.Pop()
-		if !isOk {
-			return fmt.Errorf("try to divide but no previous number for %f", number)
-		} else if number == 0 {
+		if number == 0 {
 			return errors.New("divide by zero")
 		}
-
-		current.stack.Push(prev.(float64) / number)
-		return nil
+		return executeBinary(current, number, func(a float64, b float64) float64 { return a / b }, "divide")
 	case '*':
-		prev, isOk := current.stack.Pop()
-		if !isOk {
-			return fmt.Errorf("try to multiply but no previous number for %f", number)
-		}
-
-		current.stack.Push(prev.(float64) * number)
-		return nil
+		return executeBinary(current, number, func(a float64, b float64) float64 { return a * b }, "multiply")
 	case '^':
-		prev, isOk := current.stack.Pop()
-		if !isOk {
-			return fmt.Errorf("try to execute pow but no previous number for %f", number)
-		}
-
-		current.stack.Push(math.Pow(prev.(float64), number))
-		return nil
+		return executeBinary(current, number, func(a float64, b float64) float64 { return math.Pow(a, b) }, "pow")
 	case '-':
 		current.stack.Push(-number)
 		return nil
@@ -159,4 +144,15 @@ func executeOperation(current *calculationStackItem, number float64) error {
 		current.stack.Push(number)
 		return nil
 	}
+}
+
+func executeBinary(current *calculationStackItem, number float64, fn binaryFn, text string) error {
+	prev, isOk := current.stack.Pop()
+	if !isOk {
+		return fmt.Errorf("try to execute %s but no previous number for %f", text, number)
+	}
+
+	result := fn(prev.(float64), number)
+	current.stack.Push(result)
+	return nil
 }

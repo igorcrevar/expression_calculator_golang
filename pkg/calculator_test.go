@@ -60,7 +60,7 @@ func TestInvalidParenthesisClose(t *testing.T) {
 }
 
 func TestInvalidDivide(t *testing.T) {
-	should := "try to divide but no previous number for 6.000000"
+	should := "try to execute divide but no previous number for 6.000000"
 	_, err := Calculate("/(3+3)")
 	if err == nil || err.Error() != should {
 		t.Errorf("got error %q instead of %q", err, should)
@@ -68,7 +68,7 @@ func TestInvalidDivide(t *testing.T) {
 }
 
 func TestInvalidMultiply(t *testing.T) {
-	should := "try to multiply but no previous number for 3.000000"
+	should := "try to execute multiply but no previous number for 3.000000"
 	_, err := Calculate("*3")
 	if err == nil || err.Error() != should {
 		t.Errorf("got error %q instead of %q", err, should)
