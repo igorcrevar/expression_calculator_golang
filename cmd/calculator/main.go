@@ -15,6 +15,7 @@ func printCalculation(expression string) {
 }
 
 func main() {
+	printCalculation("1+log(3*-3*1^0*-1)")
 	printCalculation("-5^2 + -5^2")
 	printCalculation("1+2-3^2")
 	printCalculation("4^(1-1)+sqrt(4^2)")

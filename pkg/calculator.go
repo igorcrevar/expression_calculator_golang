@@ -12,12 +12,23 @@ type funcType int64
 const (
 	noneFunc funcType = 0
 	sqrtFunc funcType = 1
+	logFunc  funcType = 2
 )
 
 const (
-	defaultOperator byte = ' '
-	skipOperator    byte = 'S'
+	defaultOperator byte = 0
+	skipOperator    byte = 27
 )
+
+type functionItem struct {
+	name  string
+	value funcType
+}
+
+var functons []functionItem = []functionItem{
+	{"sqrt(", sqrtFunc},
+	{"log(", logFunc},
+}
 
 type binaryFn func(a float64, b float64) float64
 
@@ -205,15 +216,21 @@ func executeFunction(current *subProcessItem, number float64) float64 {
 	case sqrtFunc:
 		current.function = noneFunc
 		return math.Sqrt(number)
+	case logFunc:
+		current.function = noneFunc
+		return math.Log10(number)
 	default:
 		return number
 	}
 }
 
 func isFunction(expression string, position int, processItem *subProcessItem) (bool, int) {
-	if position+5 < len(expression) && expression[position:position+5] == "sqrt(" {
-		processItem.function = sqrtFunc
-		position += 4 // not 5 because in next step ( case will be executed
+	for _, function := range functons {
+		if position+len(function.name) < len(expression) &&
+			expression[position:position+len(function.name)] == function.name {
+			processItem.function = function.value
+			position += len(function.name) - 1 // not 5 because in next step ( case will be executed
+		}
 	}
 	return processItem.function != noneFunc, position
 }

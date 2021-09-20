@@ -15,11 +15,11 @@ func TestSimple(t *testing.T) {
 }
 
 func TestModificators(t *testing.T) {
-	result, err := Calculate("-5+-3*-3*-3/-3*-3++3")
+	result, err := Calculate("-5+-3*-3*-3/-3*-3++3-log(3*-3*1^0*-1)")
 	if err != nil {
 		t.Errorf("got error %q", err)
-	} else if !almostEqual(result, -29.0) {
-		t.Errorf("got result %f instead of %f", result, -29.0)
+	} else if !almostEqual(result, -29.95424250944) {
+		t.Errorf("got result %f instead of %f", result, -29.95424250944)
 	}
 }
 
