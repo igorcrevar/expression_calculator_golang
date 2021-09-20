@@ -1,6 +1,9 @@
 package pkg
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestSimple(t *testing.T) {
 	result, err := Calculate("1 + - 2.1")
@@ -11,12 +14,30 @@ func TestSimple(t *testing.T) {
 	}
 }
 
+func TestModificators(t *testing.T) {
+	result, err := Calculate("-5+-3*-3*-3/-3*-3++3")
+	if err != nil {
+		t.Errorf("got error %q", err)
+	} else if !almostEqual(result, -29.0) {
+		t.Errorf("got result %f instead of %f", result, -29.0)
+	}
+}
+
 func TestParenthesisComplex(t *testing.T) {
 	result, err := Calculate("1.89 + 2 * (4+(3-1)*(3*(-3+9))) -8.49")
 	if err != nil {
 		t.Errorf("got error %q", err)
 	} else if !almostEqual(result, 73.4) {
 		t.Errorf("got result %f instead of %f", result, 73.4)
+	}
+}
+
+func TestMinusModificator(t *testing.T) {
+	result, err := Calculate("-3^-3*---3")
+	if err != nil {
+		t.Errorf("got error %q", err)
+	} else if !almostEqual(result, 0.11111111111) {
+		t.Errorf("got result %f instead of %f", result, 0.11111111111)
 	}
 }
 
@@ -60,8 +81,8 @@ func TestInvalidParenthesisClose(t *testing.T) {
 }
 
 func TestInvalidDivide(t *testing.T) {
-	should := "try to execute divide but no previous number for 6.000000"
-	_, err := Calculate("/(3+3)")
+	should := "try to execute divide but no previous number for 3.000000"
+	_, err := Calculate("3+(/3)")
 	if err == nil || err.Error() != should {
 		t.Errorf("got error %q instead of %q", err, should)
 	}
@@ -88,6 +109,32 @@ func TestInvalidOperator(t *testing.T) {
 	_, err := Calculate("3@-6")
 	if err == nil || err.Error() != should {
 		t.Errorf("got error %q instead of %q", err, should)
+	}
+}
+
+func TestOperatorNotSpecified(t *testing.T) {
+	should := "operator not specified for 5.000000"
+	_, err := Calculate("4 - 4 5")
+	if err == nil || err.Error() != should {
+		t.Errorf("got error %q instead of %q", err, should)
+	}
+}
+
+func TestOperatorNotSpecifiedParenthesis(t *testing.T) {
+	should := "operator not specified for -1024.000000"
+	_, err := Calculate("4 (-4^5)")
+	if err == nil || err.Error() != should {
+		t.Errorf("got error %q instead of %q", err, should)
+	}
+}
+
+func TestOperatorAlreadySpecified(t *testing.T) {
+	for _, ch := range [3]byte{'/', '^', '*'} {
+		should := fmt.Sprintf("operator * already specified before %c", ch)
+		_, err := Calculate(fmt.Sprintf("4*%c3", ch))
+		if err == nil || err.Error() != should {
+			t.Errorf("got error %q instead of %q", err, should)
+		}
 	}
 }
 
