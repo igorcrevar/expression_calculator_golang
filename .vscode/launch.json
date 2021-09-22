@@ -5,11 +5,12 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch file",
+            "name": "Launch Package",
             "type": "go",
             "request": "launch",
-            "mode": "debug",
-            "program": "${file}"
+            "mode": "auto",
+            "program": "${fileDirname}",
+            "args": ["10+7^(10*(2-4)-11)^3", "(10*(8*(3-8+2^2)))", "(2(3))"]
         }
     ]
 }

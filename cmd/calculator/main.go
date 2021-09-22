@@ -3,6 +3,7 @@ package main
 import (
 	pkg "expression_calculator/pkg"
 	"fmt"
+	"os"
 )
 
 func printCalculation(expression string) {
@@ -15,12 +16,11 @@ func printCalculation(expression string) {
 }
 
 func main() {
-	printCalculation("1+log(3*-3*1^0*-1)")
-	printCalculation("-5^2 + -5^2")
-	printCalculation("1+2-3^2")
-	printCalculation("4^(1-1)+sqrt(4^2)")
-	printCalculation("4/(1-1)")
-	printCalculation("1 + 2 * (4+(3-1)*(3*(-3+9))) -8")
-	printCalculation("1 + 7 * 4")
-	printCalculation("4 - 4 5")
+	if len(os.Args) < 2 {
+		fmt.Println("at least one expression must be passed as argument!")
+	} else {
+		for i := 1; i < len(os.Args); i += 1 {
+			printCalculation(os.Args[i])
+		}
+	}
 }
