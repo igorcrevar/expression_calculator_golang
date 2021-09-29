@@ -1,9 +1,10 @@
 package main
 
 import (
-	pkg "expression_calculator/pkg"
 	"fmt"
 	"os"
+
+	pkg "github.com/igorcrevar/expression_calculator_golang/pkg"
 )
 
 func printCalculation(expression string) {
